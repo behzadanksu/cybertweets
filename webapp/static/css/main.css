@@ -1,0 +1,15 @@
+.tweet {
+    margin-top:20px;
+}
+
+.tweet-green{
+    background-color: rgba(0, 92, 0, 0.54);
+}
+
+.tweet-red{
+    background-color: rgba(116, 0, 1, 0.43)
+}
+
+.btn-toolbar{
+    margin-top: 20px;
+}

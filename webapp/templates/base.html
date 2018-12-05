@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Threat Intelligence</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="http://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="/static/css/main.css">
+    <script src="/static/js/main.js"></script>
+</head>
+<body>
+    <div class="container">
+        <form class="btn-toolbar center" role="toolbar" aria-label="Toolbar with button groups" action="/tweets">
+            <div class="input-group" aria-label="First group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Threat Type</span>
+                </div>
+                {% if threat_type_list %}
+                <select name="threat_type" id="threat_type" class="custom-select">
+                    {% for type, type_count in threat_type_list %}
+                        {% if threat_type %}
+                            {% if type|lower == threat_type|lower  %}
+                                <option value="{{ type }}" selected>{{ type }} ({{ type_count }})</option>
+                            {% else %}
+                                <option value="{{ type }}">{{ type }} ({{ type_count }})</option>
+                            {% endif %}
+                        {% else %}
+                           <option value="{{ type }}">{{ type }} ({{ type_count }})</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+                {% endif %}
+            </div>
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Relevance</span>
+                </div>
+                <select name="relevance" id="relevance" class="custom-select">
+                    {% if relevance == true %}
+                        <option value="all">All</option>
+                        <option value="relevant" selected>Only Relevant</option>
+                        <option value="irrelevant">Only Irrelevant</option>
+                    {% elif relevance == false %}
+                        <option value="all">All</option>
+                        <option value="relevant">Only Relevant</option>
+                        <option value="irrelevant" selected>Only Irrelevant</option>
+                    {% else %}
+                        <option value="all" selected>All</option>
+                        <option value="relevant">Only Relevant</option>
+                        <option value="irrelevant">Only Irrelevant</option>
+                    {% endif %}
+                </select>
+            </div>
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Annotation</span>
+                </div>
+                <select name="annotation" id="annotation" class="custom-select">
+                    {% if annotation == 'threat' %}
+                        <option value="threat" selected>Threat</option>
+                        <option value="business">Business</option>
+                        <option value="irrelevant">Not Relevant</option>
+                        <option value="unknown">Don't Know</option>
+                        <option value="none">Not Annotated</option>
+                        <option value="all">All</option>
+                    {% elif annotation == 'business' %}
+                        <option value="threat">Threat</option>
+                        <option value="business" selected>Business</option>
+                        <option value="irrelevant">Not Relevant</option>
+                        <option value="unknown">Don't Know</option>
+                        <option value="none">Not Annotated</option>
+                        <option value="all">All</option>
+                    {% elif annotation == 'irrelevant' %}
+                        <option value="threat">Threat</option>
+                        <option value="business">Business</option>
+                        <option value="irrelevant" selected>Not Relevant</option>
+                        <option value="unknown">Don't Know</option>
+                        <option value="none">Not Annotated</option>
+                        <option value="all">All</option>
+                    {% elif annotation == 'none' %}
+                        <option value="threat">Threat</option>
+                        <option value="business">Business</option>
+                        <option value="irrelevant">Not Relevant</option>
+                        <option value="unknown">Don't Know</option>
+                        <option value="none" selected>Not Annotated</option>
+                        <option value="all">All</option>
+                    {% elif annotation == 'unknown' %}
+                        <option value="threat">Threat</option>
+                        <option value="business">Business</option>
+                        <option value="irrelevant">Not Relevant</option>
+                        <option value="unknown" selected>Don't Know</option>
+                        <option value="none">Not Annotated</option>
+                        <option value="all">All</option>
+                    {% else %}
+                        <option value="threat">Threat</option>
+                        <option value="business">Business</option>
+                        <option value="irrelevant">Not Relevant</option>
+                        <option value="unknown">Don't Know</option>
+                        <option value="none">Not Annotated</option>
+                        <option value="all" selected>All</option>
+                    {% endif %}
+                </select>
+            </div>
+            <div class="btn-group">
+                <button class="btn" type="submit">Submit</button>
+            </div>
+        </form>
+    </div>
+    <div class="container">
+        {% if pages_url %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    {% if prev_url != None %}
+                        <li class="page-item"><p class="page-link" href="{{ prev_url }}" type="submit">Previous</p></li>
+                    {% else %}
+                        <li class="page-item disabled"><p class="page-link" href="" type="submit">Previous</p></li>
+                    {% endif %}
+                    {% for page in pages_url %}
+                        {% if page.url == "" %}
+                            <li class="page-item disabled"><p class="page-link" href="#" type="submit">{{ page.value }}</p></li>
+                        {% elif page.current == true %}
+                            <li class="page-item active">
+                                <p class="page-link" href="{{ page.url }}" type="submit">{{ page.value }}<span class="sr-only">(current)</span></p>
+                            </li>
+                        {% else %}
+                            <li class="page-item"><p class="page-link" href="{{ page.url }}" type="submit">{{ page.value }}</p></li>
+                        {% endif %}
+                    {% endfor %}
+                    {% if next_url != None %}
+                        <li class="page-item"><p class="page-link" href="{{ next_url }}" type="submit">Next</p></li>
+                    {% else %}
+                        <li class="page-item disabled"><p class="page-link" href="" type="submit">Next</p></li>
+                    {% endif %}
+                    {% for page in key_pages %}
+                        {% if page.current == true %}
+                            <li class="page-item active">
+                                <p class="page-link" href="{{ page.url }}" type="submit">{{ page.value }}<span class="sr-only">(current)</span></p>
+                            </li>
+                        {% else %}
+                            <li class="page-item"><p class="page-link" href="{{ page.url }}" type="submit">{{ page.value }}</p></li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </nav>
+        {% endif %}
+        {% if tweets %}
+            {% for tweet in tweets %}
+                <div class="card tweet">
+                    {% if tweet.annotation %}
+                        {% if tweet.relevant == true %}
+                            <div class="card-header text-center tweet-green">Relevant</div>
+                        {% else %}
+                            <div class="card-header text-center tweet-red">Not Relevant</div>
+                        {% endif %}
+                    {% else %}
+                        {% if tweet.relevant == true %}
+                            <div class="card-header text-center">Relevant</div>
+                        {% else %}
+                            <div class="card-header text-center">Not Relevant</div>
+                        {% endif %}
+                    {% endif %}
+                    <div class="tweet_id" hidden>{{ tweet._id }}</div>
+                    <div class="card-body">
+                        <h5 class="card-title"><span class="badge">Text:</span> {{ tweet.text }}</h5>
+                        <p class="card-text"><span class="badge">Author:</span> {{ tweet.author }} <small class="text-muted">Name: {{ tweet.author_name }}</small></p>
+                        <h6 class="card-text text-center">Watson Categories</h6>
+                        <table class="table">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th scope="col">Label</th>
+                                    <th scope="col">Score</th>
+                                </tr>
+                            </thead>
+                            {% for cat in tweet.categories %}
+                            <tbody>
+                                <tr>
+                                    <td scope="row">{{ cat.label }}</td>
+                                    <td>{{ cat.score }}</td>
+                                </tr>
+                            </tbody>
+                            {% endfor %}
+                        </table>
+                    </div>
+                    <div class="card-body">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Threat Type</span>
+                            </div>
+                            {% if threat_type_list %}
+                            <select class="custom-select threat_annotate">
+                                {% for type, type_count in threat_type_list %}
+                                    {% if type | lower == tweet.type | lower  %}
+                                        <option value="{{ type }}" selected>{{ tweet.type }}</option>
+                                    {% else %}
+                                        <option value="{{ type }}">{{ type }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="card-footer text-right">
+                        <div class="input-group" role="group">
+                            <div class="input-group-prepend"><span class="input-group-text">Annotation:   </span></div>
+                            {% if tweet.annotation == 'threat' %}
+                                <button type="button" class="mybtn btn btn-outline-success active" name="threat">Threat</button>
+                                <button type="button" class="mybtn btn btn-outline-warning" name="business">Business</button>
+                                <button type="button" class="mybtn btn btn-outline-danger" name="irrelevant">Irrelevant</button>
+                                <button type="button" class="mybtn btn btn-outline-info" name="unknown">Don't Know</button>
+                            {% elif tweet.annotation == 'business' %}
+                                <button type="button" class="mybtn btn btn-outline-success" name="threat">Threat</button>
+                                <button type="button" class="mybtn btn btn-outline-warning active" name="business">Business</button>
+                                <button type="button" class="mybtn btn btn-outline-danger" name="irrelevant">Irrelevant</button>
+                                <button type="button" class="mybtn btn btn-outline-info" name="unknown">Don't Know</button>
+                            {% elif tweet.annotation == 'irrelevant' %}
+                                <button type="button" class="mybtn btn btn-outline-success" name="threat">Threat</button>
+                                <button type="button" class="mybtn btn btn-outline-warning" name="business">Business</button>
+                                <button type="button" class="mybtn btn btn-outline-danger active" name="irrelevant">Irrelevant</button>
+                                <button type="button" class="mybtn btn btn-outline-info" name="unknown">Don't Know</button>
+                            {% elif tweet.annotation == 'unknown' %}
+                                <button type="button" class="mybtn btn btn-outline-success" name="threat">Threat</button>
+                                <button type="button" class="mybtn btn btn-outline-warning" name="business">Business</button>
+                                <button type="button" class="mybtn btn btn-outline-danger" name="irrelevant">Irrelevant</button>
+                                <button type="button" class="mybtn btn btn-outline-info active" name="unknown">Don't Know</button>
+                            {% else %}
+                                <button type="button" class="mybtn btn btn-outline-success" name="threat">Threat</button>
+                                <button type="button" class="mybtn btn btn-outline-warning" name="business">Business</button>
+                                <button type="button" class="mybtn btn btn-outline-danger" name="irrelevant">Irrelevant</button>
+                                <button type="button" class="mybtn btn btn-outline-info" name="unknown">Don't Know</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+        {% if pages_url %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    {% if prev_url != None %}
+                        <li class="page-item"><p class="page-link" href="{{ prev_url }}" type="submit">Previous</p></li>
+                    {% else %}
+                        <li class="page-item disabled"><p class="page-link" href="" type="submit">Previous</p></li>
+                    {% endif %}
+                    {% for page in pages_url %}
+                        {% if page.url == "" %}
+                            <li class="page-item disabled"><p class="page-link" href="#" type="submit">{{ page.value }}</p></li>
+                        {% elif page.current == true %}
+                            <li class="page-item active">
+                                <p class="page-link" href="{{ page.url }}" type="submit">{{ page.value }}<span class="sr-only">(current)</span></p>
+                            </li>
+                        {% else %}
+                            <li class="page-item"><p class="page-link" href="{{ page.url }}" type="submit">{{ page.value }}</p></li>
+                        {% endif %}
+                    {% endfor %}
+                    {% if next_url != None %}
+                        <li class="page-item"><p class="page-link" href="{{ next_url }}" type="submit">Next</p></li>
+                    {% else %}
+                        <li class="page-item disabled"><p class="page-link" href="" type="submit">Next</p></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    </div>
+</body>
+</html>
