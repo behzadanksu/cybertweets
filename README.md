@@ -74,13 +74,13 @@ This will run the web application on port 5000 and be accessible as `localhost:5
 
 Simply select the threat type, relevance and annotation values of the tweets desired and then click on submit.
 
-![Query menu](images/cyber_tweet_query)
+![Query menu](images/cyber_tweet_query.png)
 
 #### To Annotate
 
 Here is an example of a tweet component
 
-![Tweet component](images/cyber_tweet_component)
+![Tweet component](images/cyber_tweet_component.png)
 
 ##### Threat type annotation:
 Select a threat type from the drop-down menu inside a tweet component. The web application will annotate and update the MongoDB after selecting a type
