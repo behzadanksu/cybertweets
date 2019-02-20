@@ -27,6 +27,8 @@ To run the web application simply run
 
 This will run the web application on port 5000.
 
+# Database
 
+for a Scheme of the data structure of each document please see `tweet_collection_datastructure.txt`
 
 **Now follow InstructionsWebApp.pdf**
