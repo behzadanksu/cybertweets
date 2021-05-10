@@ -25,7 +25,7 @@ The repository consists of two directories: `threat/` and `webapp/`. `threat/` c
 Once you have installed MongoDB correctly and you have an instance of mongo server running on the default port `27017` , restore the database by running the following commands:
 ```
 cd threat/
-mongorestore -d threat threat
+mongorestore -d threat .
 ```
 Now you should have a database called `threat` that contains a collection called `tweets`.
 
